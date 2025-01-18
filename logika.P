@@ -1,0 +1,188 @@
+
+% Matrica primjer
+matrica([[1, 2], [3, 4]]).
+
+
+% Baza: Dohvaćanje prvog elementa
+nth1(1, [Element|_], Element).
+
+% Rekurzija: Pomiči se kroz listu
+nth1(Index, [_|Tail], Element) :-
+    Index > 1,
+    NewIndex is Index - 1,
+    nth1(NewIndex, Tail, Element).
+
+% Baza: Prazna lista ima duljinu 0
+duljina([], 0).
+
+% Rekurzija: Duljina liste je 1 + duljina repa liste
+duljina([_|T], N) :-
+    duljina(T, M),
+    N is M + 1.
+
+% Generiranje brojeva između Min i Max (uključujući oba kraja)
+izmedu(Min, Max, Min) :- 
+    Min =< Max.
+izmedu(Min, Max, Rezultat) :-
+    Min < Max,
+    NovoMin is Min + 1,
+    izmedu(NovoMin, Max, Rezultat).
+
+
+% Zbrajanje dvaju redaka
+zbroji_retke([], [], []).
+zbroji_retke([H1|T1], [H2|T2], [H|T]) :-
+    H is H1 + H2,
+    zbroji_retke(T1, T2, T).
+
+% Zbrajanje dviju matrica
+zbroji_matrice([], [], []).
+zbroji_matrice([Red1|Redovi1], [Red2|Redovi2], [Red|Rezultat]) :-
+    zbroji_retke(Red1, Red2, Red),
+    zbroji_matrice(Redovi1, Redovi2, Rezultat).
+
+% Baza: kada su liste prazne, rezultat je 0
+skalarni_produkt([], [], 0).
+
+% Rekurzivno računanje skalarnog produkta
+skalarni_produkt([H1|T1], [H2|T2], Rezultat) :-
+    (var(H1); var(H2)) -> throw('Neinicijalizirani elementi u ulaznim listama!');
+    skalarni_produkt(T1, T2, Podrezultat), 
+    (var(Podrezultat) -> Podrezultat = 0; true), 
+    Rezultat is H1 * H2 + Podrezultat,
+    write('H1: '), write(H1), nl,
+    write('H2: '), write(H2), nl,
+    write('Trenutni rezultat: '), write(Rezultat), nl.
+
+% Dobivanje stupca iz matrice
+stupac([], _, []).
+stupac([Red|Redovi], Indeks, [Element|Stupac]) :-
+    nth1(Indeks, Red, Element),  
+    stupac(Redovi, Indeks, Stupac). 
+
+% Množenje matrica
+pomnozi_matrice([], _, []). % Kada je lista prazna, rezultat je prazan
+pomnozi_matrice([Red|Redovi], Matrica2, [RezultatniRed|Rezultat]) :-
+    write('Trenutni red: '), write(Red), nl,
+    write('Matrica 2: '), write(Matrica2), nl,
+    duljina(Matrica2, BrojStupaca), 
+    findall(Elem,
+        (izmedu(1, BrojStupaca, Indeks), 
+         write('Indeks: '), write(Indeks), nl,
+         stupac(Matrica2, Indeks, Stupac),  
+         write('Stupac: '), write(Stupac), nl,
+         skalarni_produkt(Red, Stupac, Elem)),  
+        RezultatniRed),
+    write('Rezultatni red: '), write(RezultatniRed), nl,
+    pomnozi_matrice(Redovi, Matrica2, Rezultat).
+
+
+% Baza: Ako su liste prazne, završava
+primijeni_na_sve(_, [], [], []).
+
+% Rekurzija: Primjenjuje predikat na glave liste i nastavlja s repom
+primijeni_na_sve(Predikat, [X|Xs], [Y|Ys], [Z|Zs]) :-
+    call(Predikat, X, Y, Z),
+    primijeni_na_sve(Predikat, Xs, Ys, Zs).
+
+
+% Baza: Ako su ulazna lista i izlazna lista prazne, završava
+primijeni_na_sve(_, [], []).
+
+% Rekurzivno primjenjuje predikat na svaki element liste
+primijeni_na_sve(Predikat, [X|Xs], [Y|Ys]) :-
+    call(Predikat, X, Y),
+    primijeni_na_sve(Predikat, Xs, Ys).
+
+zbroji(X, Y, Rezultat) :-
+    Rezultat is X + Y.
+
+
+% Transponiranje matrice
+transponiraj([], []). % Prazna matrica ostaje prazna
+transponiraj([[]|_], []). 
+transponiraj(Matrica, [Red|Transponirana]) :-
+    primijeni_na_sve(prvi_element_i_ostatak, Matrica, Red, Ostatak), % Primjena na sve redove
+    transponiraj(Ostatak, Transponirana). % Rekurzivno nastavlja s ostatkom matrice
+
+% Dohvaćanje prvog elementa i ostatka
+prvi_element_i_ostatak([X|Xs], X, Xs).
+
+
+% Oduzimanje dvije matrice
+oduzmi_matrice([], [], []).
+oduzmi_matrice([Red1|OstaliRedovi1], [Red2|OstaliRedovi2], [RezultatRed|OstaliRezultati]) :-
+    oduzmi_redove(Red1, Red2, RezultatRed),
+    oduzmi_matrice(OstaliRedovi1, OstaliRedovi2, OstaliRezultati).
+
+% Oduzimanje dva reda
+oduzmi_redove([], [], []).
+oduzmi_redove([Element1|Ostatak1], [Element2|Ostatak2], [Rezultat|OstatakRezultata]) :-
+    Rezultat is Element1 - Element2,
+    oduzmi_redove(Ostatak1, Ostatak2, OstatakRezultata).
+
+
+% Skaliranje retka
+skaliraj_red([], _, []).
+skaliraj_red([H|T], Skalar, [R|RT]) :-
+    R is H * Skalar,
+    skaliraj_red(T, Skalar, RT).
+
+% Skaliranje matrice
+skaliraj_matricu([], _, []).
+skaliraj_matricu([Red|Redovi], Skalar, [SkaliraniRed|SkaliraniRedovi]) :-
+    skaliraj_red(Red, Skalar, SkaliraniRed),
+    skaliraj_matricu(Redovi, Skalar, SkaliraniRedovi).
+
+
+% Baza: Spajanje prazne liste s nekom drugom listom daje tu drugu listu
+spoji([], L, L).
+
+% Rekurzija: Dodaj prvi element prve liste i spajanje nastavi s ostatkom
+spoji([H|T], L, [H|Rezultat]) :-
+    spoji(T, L, Rezultat).
+
+
+% Baza: Determinanta 1x1 matrice
+determinanta([[X]], X).
+
+% Rekurzivno računanje determinante za NxN matricu
+determinanta(Matrica, Det) :-
+    [PrviRed|_] = Matrica, 
+    duljina(PrviRed, N), 
+    findall(Cofactor,
+        (izmedu(1, N, Indeks), 
+         nth1(Indeks, PrviRed, Elem), 
+         minor(Matrica, 1, Indeks, Minor),
+         determinanta(Minor, MinorDet), 
+         Cofactor is ((-1)^(1 + Indeks)) * Elem * MinorDet), 
+        Cofactori),
+    suma(Cofactori, Det).
+
+% Zbrajanje elemenata liste
+suma([], 0).
+suma([H|T], Suma) :-
+    suma(T, PodSuma),
+    Suma is H + PodSuma.
+
+
+% Dobivanje minora uklanjanjem retka i stupca
+minor(Matrica, IndeksReda, IndeksStupca, Minor) :-
+    izbaci_n(IndeksReda, Matrica, MatricaBezReda),
+    primijeni_na_sve(izbaci_n(IndeksStupca), MatricaBezReda, Minor).
+
+% Pomoćni predikat za izbacivanje n-tog elementa iz liste
+izbaci_n(1, [_|T], T).
+izbaci_n(N, [H|T], [H|Rezultat]) :-
+    N > 1,
+    NovoN is N - 1,
+    izbaci_n(NovoN, T, Rezultat).
+
+% Pomoćni predikat za izbacivanje retka iz matrice
+izbaci_red(N, [Red|Redovi], Rezultat) :-
+    spoji(Prefix, [_|Suffix], [Red|Redovi]),
+    duljina(Prefix, N1),
+    N is N1 + 1,
+    spoji(Prefix, Suffix, Rezultat).
+
+
