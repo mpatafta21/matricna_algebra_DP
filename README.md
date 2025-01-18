@@ -13,23 +13,41 @@ Slijedite ove korake kako biste pokrenuli aplikaciju:
 ### 1. Preuzimanje projekta
 Preuzmite projekt s GitHub repozitorija
 
-## 2. Kreirajte i aktivirajte Python virtualno okruženje
+### 2. Kreirajte i aktivirajte Python virtualno okruženje (ako se nalazite na virtualnoj mašini)
+```bash
 python3 -m venv venv
 source venv/bin/activate
+```
+### 3. Promjena putanje do XSB datoteke
+Osigurajte da putanja do XSB Prologa u Python datoteci (app.py) odgovara stvarnoj putanji na vašem sustavu.
 
-## 3. U terminalu navigirajte do mape projekta i pokrenite Flask aplikaciju upisom sljedeće naredbe:
+Provjerite ovu liniju u app.py:
+
+```python
+process = subprocess.Popen(
+    ["/putanja/do/xsb/bin/xsb", "--noprompt"],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True
+)
+```
+### 4. U terminalu navigirajte do mape projekta i pokrenite Flask aplikaciju upisom sljedeće naredbe:
+```bash
 python app.py
+```
+Aplikacija će biti dostupna na adresi: http://127.0.0.1:5000.
 
-## Aplikacija će biti dostupna na adresi: http://127.0.0.1:5000.
+### 5. Pokrenite preglednik i otvorite adresu http://127.0.0.1:5000
 
-## 4. Pokrenite preglednik i otvorite adresu http://127.0.0.1:5000
-
-## 5.  odgovarajuća polja unesite matrice u sljedećem formatu:
+### 6.  odgovarajuća polja unesite matrice u sljedećem formatu:
 Svaki red unosi se u novi redak.
+
 Elementi u jednom retku odvajaju se razmakom.
+
 Svi redovi moraju imati isti broj elemenata.
 
-## 6. Kliknite na odgovarajući gumb za operaciju
+### 7. Kliknite na odgovarajući gumb za operaciju
 
 
    
